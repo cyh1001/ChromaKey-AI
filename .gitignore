@@ -33,7 +33,6 @@ MANIFEST
 *.exe
 
 # ONNX Models
-*.onnx
 
 # IDE / Editor
 .idea/
