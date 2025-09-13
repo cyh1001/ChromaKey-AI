@@ -5,8 +5,8 @@ import os
 import time
 
 # Define the path to the ONNX model
-model_path = "C:\\Users\\qc_de\\Desktop\\edgeai\\ChromaKey-AI\\model.onnx"
-
+# model_path = "C:\\Users\\qc_de\\Desktop\\edgeai\\ChromaKey-AI\\model.onnx"
+model_path = "models/model.onnx"
 # Load the ONNX model and create an inference session
 try:
     # Use CPUExecutionProvider for initial testing.
@@ -56,7 +56,7 @@ def main():
 
         # Preprocess the frame for the AI model
         # 1. Resize to model input size (e.g., 1024x1024)
-        resized_frame = cv2.resize(frame, (1024, 1024))
+        resized_frame = cv2.resize(frame, (224, 224))
 
         # 2. Normalize pixel values from [0, 255] to [0, 1]
         normalized_frame = resized_frame.astype('float32') / 255.0
@@ -67,6 +67,9 @@ def main():
         # For now, let's assume the model is fine with BGR or we'll adjust later.
         input_tensor = normalized_frame.transpose(2, 0, 1)  # HWC to CHW
         input_tensor = np.expand_dims(input_tensor, axis=0) # Add batch dimension (1, C, H, W)
+
+        # Convert the input tensor to uint8
+        input_tensor = (input_tensor * 255).astype(np.uint8)
 
         # For verification, you can print the shape and type of the preprocessed tensor
         print(f"[{time.time()}] Preprocessed tensor shape: {input_tensor.shape}, dtype: {input_tensor.dtype}")
