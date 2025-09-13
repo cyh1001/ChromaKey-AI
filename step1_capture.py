@@ -5,7 +5,7 @@ import os
 import time
 
 # Define the path to the ONNX model
-model_path = "C:\\Users\\qc_de\\Desktop\\edgeai\\ChromaKey-AI\\model.onnx"
+model_path = r"C:\Users\qc_de\Desktop\edgeai\ChromaKey-AI\sinet-sinet-float.onnx\model.onnx\model.onnx"
 
 # Load the ONNX model and create an inference session
 try:
@@ -44,6 +44,10 @@ def main():
 
     print(f"[{time.time()}] Camera opened successfully. Press 'q' to quit the window.")
 
+    save_dir = "output_masks"
+    os.makedirs(save_dir, exist_ok=True)  # Create folder if it doesn't exist
+    frame_count = 0  # Add this before your while loop
+
     # Loop to continuously read frames from the camera.
     while True:
         print(f"[{time.time()}] Inside video loop: Attempting to read frame.")
@@ -57,8 +61,13 @@ def main():
             break
 
         # Preprocess the frame for the AI model
-        # 1. Resize to model input size (e.g., 224x224)
-        resized_frame = cv2.resize(frame, (224, 224))
+        # Get model input shape dynamically
+        input_shape = ort_session.get_inputs()[0].shape
+        model_height = input_shape[2]
+        model_width = input_shape[3]
+
+        # 1. Resize to model input size
+        resized_frame = cv2.resize(frame, (model_width, model_height))
 
         # 2. Normalize pixel values from [0, 255] to [0, 1]
         normalized_frame = resized_frame.astype('float32') / 255.0
@@ -88,6 +97,27 @@ def main():
             # TODO: Further processing of the mask (e.g., visualize, apply to original frame)
             # For now, we just print its properties.
             print(f"[{time.time()}] Inference complete. Mask obtained.")
+
+            # 人像分割和背景虚化
+            mask_img = np.squeeze(mask)
+            if mask_img.ndim == 3:
+                mask_img = mask_img[0]
+            # 归一化到0~1
+            mask_img = np.clip(mask_img, 0, 1)
+            mask_resized = cv2.resize(mask_img, (frame.shape[1], frame.shape[0]))
+            mask_3c = np.repeat(mask_resized[:, :, np.newaxis], 3, axis=2)
+
+            # 反转掩码：人像为1，背景为0
+            mask_3c = (mask_3c > 0.5).astype(np.float32)
+            mask_3c = 1 - mask_3c
+
+            # 背景虚化（加大模糊程度，比如用更大的核）
+            blurred = cv2.GaussianBlur(frame, (51, 51), 0)  # 原来是(31, 31)，现在更大
+            result = (frame * mask_3c + blurred * (1 - mask_3c)).astype(np.uint8)
+
+            # 显示分割结果
+            cv2.imshow('Portrait Segmentation & Background Blur', result)
+            # 不保存分割结果到文件夹
 
         print(f"[{time.time()}] Attempting to display frame.")
         # Display the raw, unprocessed video frame in a window.
