@@ -12,13 +12,15 @@ try:
     # Use CPUExecutionProvider for initial testing.
     # For Snapdragon NPU, this would eventually be ['QNNExecutionProvider', 'CPUExecutionProvider']
     ort_session = onnxruntime.InferenceSession(model_path, providers=['QNNExecutionProvider', 'CPUExecutionProvider'])
-    print(f"ONNX model loaded successfully from: {model_path} using providers: {ort_session.get_providers()}")
+    print(f"ONNX model loaded successfully from: {model_path}")
+    print(f"Actual providers used: {ort_session.get_providers()}")
 except Exception as e:
     print(f"Error loading ONNX model: {e}")
     print("Attempting to load with CPUExecutionProvider only as a fallback...")
     try:
         ort_session = onnxruntime.InferenceSession(model_path, providers=['CPUExecutionProvider'])
         print(f"ONNX model loaded successfully from: {model_path} using CPUExecutionProvider only.")
+        print(f"Actual providers used: {ort_session.get_providers()}")
     except Exception as fallback_e:
         print(f"Error loading ONNX model with CPUExecutionProvider fallback: {fallback_e}")
         ort_session = None # Set to None if loading fails
@@ -55,8 +57,8 @@ def main():
             break
 
         # Preprocess the frame for the AI model
-        # 1. Resize to model input size (e.g., 1024x1024)
-        resized_frame = cv2.resize(frame, (1024, 1024))
+        # 1. Resize to model input size (e.g., 224x224)
+        resized_frame = cv2.resize(frame, (224, 224))
 
         # 2. Normalize pixel values from [0, 255] to [0, 1]
         normalized_frame = resized_frame.astype('float32') / 255.0
