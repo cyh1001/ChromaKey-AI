@@ -20,10 +20,19 @@ def main():
     try:
         # 2. Try to load the model and create an inference session
         # When creating the session, you can specify the execution providers.
-        # For Snapdragon, this would eventually be ['QNNExecutionProvider', 'CPUExecutionProvider']
-        # For this initial test, we'll use the default CPU provider to keep it simple.
-        ort_session = onnxruntime.InferenceSession(model_path, providers=['CPUExecutionProvider'])
-
+        # We prioritize QNNExecutionProvider for NPU acceleration and fall back to CPUExecutionProvider.
+        providers = ['QNNExecutionProvider', 'CPUExecutionProvider']
+        try:
+            ort_session = onnxruntime.InferenceSession(model_path, providers=providers)
+        except Exception as e:
+            print(f"Error loading model with providers {providers}: {e}")
+            print("Attempting to load with CPUExecutionProvider only as a fallback...")
+            providers = ['CPUExecutionProvider']
+            ort_session = onnxruntime.InferenceSession(model_path, providers=providers)
+ 
+        print(f"ONNX model loaded successfully from: {model_path}")
+        print(f"Using ONNX Runtime providers: {ort_session.get_providers()}")
+ 
         # 3. If successful, print a success message and model info
         print("\n-------------------------------------------------")
         print("Success! Model loaded without errors.")
