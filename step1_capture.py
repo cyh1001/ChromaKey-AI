@@ -7,6 +7,7 @@ import time
 # Define the path to the ONNX model
 model_path = r"C:\Users\qc_de\Desktop\edgeai\ChromaKey-AI\sinet-sinet-float.onnx\model.onnx\model.onnx"
 
+
 # Load the ONNX model and create an inference session
 try:
     # Use CPUExecutionProvider for initial testing.
