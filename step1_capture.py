@@ -5,6 +5,7 @@ import os
 import time
 import sys
 
+<<<<<<< HEAD
 # Helper function to get the correct path for data files (like the ONNX model)
 # whether running as a script or as a frozen .exe.
 def resource_path(relative_path):
@@ -16,6 +17,10 @@ def resource_path(relative_path):
         # not in PyInstaller bundle
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+=======
+# Define the path to the ONNX model
+model_path = "./sinet-sinet-float.onnx/model.onnx/model.onnx"
+>>>>>>> 422e2a495e66a530465c912699ba87ce4564ac0e
 
 # --- Model Loading ---
 # Define the path to the ONNX model files
