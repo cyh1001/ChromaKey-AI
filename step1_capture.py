@@ -5,7 +5,7 @@ import os
 import time
 
 # Define the path to the ONNX model
-model_path = ".\sinet-sinet-float.onnx\model.onnx\model.onnx"
+model_path = "./sinet-sinet-float.onnx/model.onnx/model.onnx"
 
 
 # Load the ONNX model and create an inference session
