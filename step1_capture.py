@@ -5,14 +5,14 @@ import os
 import time
 
 # Define the path to the ONNX model
-model_path = r"C:\Users\qc_de\Desktop\edgeai\ChromaKey-AI\sinet-sinet-float.onnx\model.onnx\model.onnx"
+model_path = ".\sinet-sinet-float.onnx\model.onnx\model.onnx"
 
 
 # Load the ONNX model and create an inference session
 try:
     # Use CPUExecutionProvider for initial testing.
     # For Snapdragon NPU, this would eventually be ['QNNExecutionProvider', 'CPUExecutionProvider']
-    ort_session = onnxruntime.InferenceSession(model_path, providers=['QNNExecutionProvider', 'CPUExecutionProvider'])
+    ort_session = onnxruntime.InferenceSession(model_path, providers=[ 'CPUExecutionProvider'])
     print(f"ONNX model loaded successfully from: {model_path}")
     print(f"Actual providers used: {ort_session.get_providers()}")
 except Exception as e:
