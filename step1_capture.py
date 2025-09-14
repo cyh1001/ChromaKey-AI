@@ -3,28 +3,49 @@ import numpy as np
 import onnxruntime
 import os
 import time
+import sys
 
-# Define the path to the ONNX model
-model_path = ".\sinet-sinet-float.onnx\model.onnx\model.onnx"
+# Helper function to get the correct path for data files (like the ONNX model)
+# whether running as a script or as a frozen .exe.
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # not in PyInstaller bundle
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
+# --- Model Loading ---
+# Define the path to the ONNX model files
+model_path = resource_path("model.onnx")
 
-# Load the ONNX model and create an inference session
+ort_session = None
+print("--- ChromaKey AI Starting ---")
 try:
-    # Use CPUExecutionProvider for initial testing.
-    # For Snapdragon NPU, this would eventually be ['QNNExecutionProvider', 'CPUExecutionProvider']
-    ort_session = onnxruntime.InferenceSession(model_path, providers=[ 'CPUExecutionProvider'])
-    print(f"ONNX model loaded successfully from: {model_path}")
-    print(f"Actual providers used: {ort_session.get_providers()}")
+    print("Attempting to load model with QNNExecutionProvider (NPU)...")
+    ort_session = onnxruntime.InferenceSession(model_path, providers=['QNNExecutionProvider', 'CPUExecutionProvider'])
+    print(f"Providers selected: {ort_session.get_providers()}")
+    if 'QNNExecutionProvider' in ort_session.get_providers():
+        print("SUCCESS: NPU provider is active.")
+    else:
+        print("NOTE: NPU provider was not used. Fell back to CPU.")
 except Exception as e:
-    print(f"Error loading ONNX model: {e}")
-    print("Attempting to load with CPUExecutionProvider only as a fallback...")
+    print(f"NPU initialization failed: {e}")
+    print("Attempting to load with CPUExecutionProvider only...")
     try:
         ort_session = onnxruntime.InferenceSession(model_path, providers=['CPUExecutionProvider'])
-        print(f"ONNX model loaded successfully from: {model_path} using CPUExecutionProvider only.")
-        print(f"Actual providers used: {ort_session.get_providers()}")
+        print(f"Providers selected: {ort_session.get_providers()}")
+        print("SUCCESS: Model loaded on CPU.")
     except Exception as fallback_e:
-        print(f"Error loading ONNX model with CPUExecutionProvider fallback: {fallback_e}")
-        ort_session = None # Set to None if loading fails
+        print(f"FATAL: Failed to load model on CPU as well: {fallback_e}")
+        ort_session = None
+
+if not ort_session:
+    print("Could not initialize ONNX Runtime session. Exiting.")
+    sys.exit(1)
+
 
 def main():
     print(f"[{time.time()}] Starting main function.")

@@ -1,70 +1,127 @@
-# ChromaKey AI
+# ChromaKey-AI
 
-这是一个利用Snapdragon® X Elite处理器端侧AI计算能力，实现实时视频背景替换的工具。项目旨在提供一个无需绿幕、零延迟、保护隐私的个人虚拟演播室体验。
+## Project Description
 
-## 项目背景与愿景
-在数字内容创作时代，解决传统绿幕方案成本高昂、繁琐，以及云端AI抠图服务隐私泄露、高延迟、网络依赖等痛点。ChromaKey AI致力于在本地设备上运行，提供智能、安全、高效的实时视频背景处理。
+**ChromaKey-AI** is an innovative real-time video background processing tool developed as a hackathon project. Our vision is to transform personal video creation by leveraging the powerful on-device AI capabilities of the **Snapdragon® X Elite processor**.
 
-## 安装与设置 (Installation & Setup)
+## Team
+Yihan Cao, yihancao1001@gmail.com
+Yinfei Wang，yw8676@nyu.edu
+Kingyu Poon， kp2653@nyu.edu
+Siyuan Zhang, jason4huare@gmail.com
+Wanqi Huang，wanqihuang@nyu.edu
 
-请按照以下步骤设置您的开发环境并运行项目：
+**Problem Statement:**
+In the era of digital content creation, professionals and enthusiasts alike face challenges in achieving clean, professional video backgrounds.
+*   **Physical Green Screens:** Traditional methods involve costly, space-consuming, and cumbersome physical green screens and elaborate lighting setups, severely limiting creative flexibility.
+*   **Cloud-based AI Solutions:** While convenient, cloud AI services pose significant drawbacks:
+    *   **Privacy Risks:** User video streams are uploaded to third-party servers.
+    *   **High Latency:** Network transmission and cloud computation introduce noticeable delays.
+    *   **Network Dependency:** Unusable without an internet connection.
+    *   **Subscription Costs:** Ongoing expenses for service usage.
 
-### 1. 克隆仓库 (Clone the Repository)
-```bash
-git clone https://github.com/your-username/ChromaKey-AI.git # 请替换为您的实际仓库地址
-cd ChromaKey-AI
-```
 
-### 2. 创建并激活Python虚拟环境 (Create and Activate Python Virtual Environment)
-强烈建议使用虚拟环境来管理项目依赖。
+**Our Vision:**
+ChromaKey-AI aims to completely eliminate these pain points. We are building a tool that runs entirely on the local device, requires no physical green screen, offers zero latency, and ensures absolute privacy protection. Our goal is to create an intelligent, secure, and efficient personal virtual studio accessible to everyone.
 
-#### Windows
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
+![NPU Usage Effect Diagram](npu.png)
 
-#### macOS / Linux
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+## Setup Instructions
 
-### 3. 安装依赖 (Install Dependencies)
-我们推荐使用 `uv` 进行更快的安装。如果您尚未安装 `uv`，可以先通过 `pip install uv` 安装它。
+To set up the project environment and run the application, please follow these steps:
 
-#### 使用 `uv` (推荐)
-```bash
-uv pip install -r requirements.txt
-```
+### Prerequisites
 
-#### 使用 `pip`
-```bash
-pip install -r requirements.txt
-```
+*   **Python 3.11 (x64 recommended):** Ensure you have Python 3.11 (64-bit) installed on your system. You can verify your installed versions using `py --list-paths`.
+*   **Virtual Environment:** It is highly recommended to use a virtual environment to manage project dependencies.
 
-### 4. 下载AI模型 (Download the AI Model)
-AI模型文件（约466MB）未包含在Git仓库中。请使用以下命令下载模型，并将其保存为 `model.onnx` 在项目根目录中。
+### Environment Setup
 
-```bash
-curl -L https://huggingface.co/onnx-community/BiRefNet-portrait-ONNX/resolve/main/onnx/model_fp16.onnx -o model.onnx
-```
+1.  **Create a Virtual Environment:**
+    Open your terminal or command prompt in the project root directory (`C:\Users\qc_de\Desktop\edgeai\ChromaKey-AI\`) and create a new virtual environment. We recommend naming it `x64` to reflect the Python version.
+    ```bash
+    py -3.11 -m venv x64
+    ```
 
-## 使用方法 (Usage)
+2.  **Activate the Virtual Environment:**
+    *   **Windows:**
+        ```bash
+        .\x64\Scripts\activate
+        ```
 
-在完成上述安装步骤后，您可以通过运行主应用程序脚本来启动项目。
+3.  **Install Dependencies:**
+    Once the virtual environment is activated, install the necessary Python packages. We use `onnxruntime-qnn` for Snapdragon NPU compatibility (though it may fall back to CPU if NPU is not fully compatible) and `opencv-python` for video processing.
+    ```bash
+    pip install onnxruntime-qnn opencv-python mediapipe
+    ```
+    *(Note: `numpy` and other common dependencies will be installed automatically.)*
 
-```bash
-# 确保您已激活虚拟环境
-python main_app.py # 替换为您的主应用程序脚本名称
-```
+### Required Files
 
-## 核心技术栈 (Core Tech Stack)
-*   **Python:** 主要开发语言。
-*   **ONNX Runtime:** 用于加载 `.onnx` 模型并在 Snapdragon NPU 上进行硬件加速推理。
-*   **OpenCV (`opencv-python`):** 负责视频流处理、图像预处理、画面合成与显示。
-*   **NumPy:** 用于高效的图像数组运算。
-*   **uv / pip:** 包管理工具。
+*   **ONNX Model:** The project uses the `sinet-sinet-float.onnx` model for background segmentation. This model and its associated data file (`model.data`) are expected to be located at `./sinet-sinet-float.onnx/model.onnx/model.onnx` and `./sinet-sinet-float.onnx/model.onnx/model.data` relative to the project root.
+*   **Background Images (for `gesture_segmentation_bg_switch.py`):** For the gesture-controlled background switching script, you need to place three image files in the project root directory:
+    *   `bg1.jpg`
+    *   `bg2.jpg`
+    *   `bg3.jpg`
+    *(You can use any `.jpg` images you prefer for these.)*
 
-## 许可证 (License)
-本项目采用 MIT 许可证。
+## Running and Usage Instructions
+
+After setting up the environment and placing all required files, you can run the application scripts.
+
+### Basic Background Blur (`step1_capture.py`)
+
+This script provides real-time background blurring. It attempts to use the NPU first and falls back to CPU if NPU acceleration is not fully compatible.
+
+1.  **Activate your virtual environment** (if not already active).
+    ```bash
+    .\x64\Scripts\activate
+    ```
+2.  **Run the script:**
+    ```bash
+    python step1_capture.py
+    ```
+3.  **Usage:**
+    *   A window displaying the real-time video with background blur will appear.
+    *   To exit the application, ensure the application window is in focus and press the **'q'** key on your keyboard.
+
+### Gesture-Controlled Background Switching (`gesture_segmentation_bg_switch.py`)
+
+This script extends the background segmentation with hand gesture recognition to dynamically switch backgrounds.
+
+1.  **Activate your virtual environment** (if not already active).
+    ```bash
+    .\x64\Scripts\activate
+    ```
+2.  **Ensure background images are in place** (`bg1.jpg`, `bg2.jpg`, `bg3.jpg` in the project root).
+3.  **Run the script:**
+    ```bash
+    python gesture_segmentation_bg_switch.py
+    ```
+4.  **Usage:**
+    *   A window displaying the real-time video with a dynamic background will appear.
+    *   Make an "Open Hand" gesture in front of the camera to switch to the next background image.
+    *   To exit the application, ensure the application window is in focus and press the **'q'** key on your keyboard.
+
+### Packaging as an Executable
+
+You can package `step1_capture.py` into a standalone `.exe` file for easy distribution.
+
+1.  **Activate your virtual environment** (if not already active).
+    ```bash
+    .\x64\Scripts\activate
+    ```
+2.  **Install PyInstaller** (if not already installed):
+    ```bash
+    pip install pyinstaller
+    ```
+3.  **Run the packaging command:**
+    ```bash
+    pyinstaller --onefile --noconsole --add-data "sinet-sinet-float.onnx/model.onnx/model.onnx;." --add-data "sinet-sinet-float.onnx/model.onnx/model.data;." step1_capture.py
+    ```
+    *(Note: The `--add-data` paths assume you run this command from the project root. The `.` in the destination means the files will be placed in the root of the packaged executable's temporary directory.)*
+4.  **Find the Executable:** The generated `.exe` file will be located in the `dist` folder within your project directory.
+
+## License
+
+This project is licensed under the **MIT License**. See the `LICENSE` file for more details.

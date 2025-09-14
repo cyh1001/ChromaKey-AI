@@ -14,7 +14,7 @@ bg_index = 0
 
 # Load ONNX segmentation model
 MODEL_PATH = r"./sinet-sinet-float.onnx/model.onnx/model.onnx"
-ort_session = onnxruntime.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
+ort_session = onnxruntime.InferenceSession(MODEL_PATH, providers=['QNNExecutionProvider','CPUExecutionProvider'])
 
 def segment_frame(frame):
     input_shape = ort_session.get_inputs()[0].shape
